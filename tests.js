@@ -24,10 +24,13 @@ console.log('request received '+req.url);
 };
 var thenRespond = (c, b) => ({ code: c, body: b });
 
-var stop = (server) => function() {
-  console.log('closing');
-  spawn('nginx/nginx', ['-c', 'nginx.conf', '-s', 'stop']);
-  server.close();
+var stop = function () {
+  var args = [].slice.call(arguments, 0);
+  return function() {
+    console.log('closing');
+    spawn('nginx/nginx', ['-c', 'nginx.conf', '-s', 'stop']);
+    args.map((server) => server.close());
+  };
 };
 
 function startNginx () {
