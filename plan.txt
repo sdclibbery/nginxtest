@@ -1,0 +1,9 @@
+HTTP mocking
+
+https://www.npmjs.com/package/mock-http-server
+http://wiremock.org/
+
+
+DNS mocking
+
+http://jhrozek.livejournal.com/4301.html
