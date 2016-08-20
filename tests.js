@@ -27,6 +27,17 @@ function mockServer(host, port) {
 };
 var thenRespond = (c, b) => ({ code: c, body: b });
 
+
+function mockDns(host, port) {
+  return {
+    on: function (domain, host) {
+      return { and: (cb) => { cb(); return {close:()=>0}; } }
+    },
+  };
+};
+var goto = (host) => host;
+
+
 var stop = function () {
   var args = [].slice.call(arguments, 0);
   return function() {
@@ -36,8 +47,11 @@ var stop = function () {
   };
 };
 
+
 function startNginx () {
-  return spawn('nginx/nginx', ['-c', 'nginx.conf']);
+  var nginx = spawn('nginx/nginx', ['-c', 'nginx.conf']);
+  nginx.stderr.on('data', (d) => console.log(''+d));
+  return nginx;
 };
 function request(url) {
   dbg('request');
@@ -72,39 +86,43 @@ function expect (req) {
   var result = {
     code: (c) => { expected.code = c; return result; },
     body: (b) => { expected.body = b; return result; },
-    then: (cb) => { req.callback = (code, body) => {
-      dbg('checking');
-      assert(expected.code, code, 'code');
-      assert(expected.body, body, 'body');
-      cb();
-    }; },
+    then: (cb, done) => {
+      req.callback = (code, body) => {
+        dbg('checking');
+        assert(expected.code, code, 'code');
+        assert(expected.body, body, 'body');
+        cb();
+        done();
+      };
+    },
   };
   return result;
 };
 var is = (x) => x;
 
 
-var tests = {};
+var tests = [];
 
-tests.proxiesHomepageToLocalhost = function () {
+tests.push({name: 'proxiesHomepageToLocalhost', test: function (done) {
   var server = mockServer('127.0.0.1', 8080).on("/", thenRespond(200, "homepage")).and(()=>{
     startNginx("live");
-    expect(request("http://127.0.0.1:80/")).code(is(200)).body(is("homepage")).then(stop(server));
+    expect(request("http://127.0.0.1:80/")).code(is(200)).body(is("homepage")).then(stop(server), done);
   });
-};
+}});
 
-/*
-tests.proxiesClassifiedsToMarketplaceWeb = function () {
+tests.push({name: 'proxiesClassifiedsToMarketplaceWeb', test: function (done) {
   var dns = mockDns('127.0.0.2', 8080).on("beta.marketplace.thehutgroup.local", goto("127.0.0.2")).and(()=>{
-    var server = mockServer('127.0.0.2', 8080).on("/", thenRespond(200, "homepage")).and(()=>{
+    var server = mockServer('127.0.0.2', 8080).on("/", thenRespond(200, "classifiedspage")).and(()=>{
       startNginx("live");
-      expect(request("http://127.0.0.1:80/classifieds/pets/cats/all/uk")).code(is(200)).body(is("classifieds")).then(stop(server, dns));
+      expect(request("http://127.0.0.1:80/classifieds/pets/cats/all/uk")).code(is(200)).body(is("classifiedspage")).then(stop(server, dns), done);
     });
   });
-};
-*/
+}});
 
-Object.keys(tests).map(function(key) {
-   console.log('TEST '+key);
-   tests[key]();
-});
+function runTest(idx) {
+  if (tests[idx]) {
+    console.log('TEST '+tests[idx].name);
+    tests[idx].test(() => runTest(idx+1) );
+  }
+};
+runTest(0);
