@@ -110,14 +110,16 @@ tests.push({name: 'proxiesHomepageToLocalhost', test: function (done) {
   });
 }});
 
-tests.push({name: 'proxiesClassifiedsToMarketplaceWeb', test: function (done) {
-  var dns = mockDns('127.0.0.2', 8080).on("beta.marketplace.thehutgroup.local", goto("127.0.0.2")).and(()=>{
-    var server = mockServer('127.0.0.2', 8080).on("/", thenRespond(200, "classifiedspage")).and(()=>{
+/*
+tests.push({name: 'proxiesThingTo', test: function (done) {
+  var dns = mockDns('127.0.0.2', 8080).on("beta.other.host", goto("127.0.0.2")).and(()=>{
+    var server = mockServer('127.0.0.2', 8080).on("/thing/doodah", thenRespond(200, "thingpage")).and(()=>{
       startNginx("live");
-      expect(request("http://127.0.0.1:80/classifieds/pets/cats/all/uk")).code(is(200)).body(is("classifiedspage")).then(stop(server, dns), done);
+      expect(request("http://127.0.0.1:80/thing/doodah")).code(is(200)).body(is("thingpage")).then(stop(server, dns), done);
     });
   });
 }});
+*/
 
 function runTest(idx) {
   if (tests[idx]) {
