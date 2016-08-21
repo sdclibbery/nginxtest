@@ -114,6 +114,11 @@ tests.push({name: 'proxiesHomepageToLocalhost', test: function (done) {
   });
 }});
 
+tests.push({name: 'nonExistantPageIs404', test: function (done) {
+  startNginx();
+  expect(request("http://127.0.0.1:80/not-here")).code(is(404)).then(stop(), done);
+}});
+
 tests.push({name: 'rewriteFoobarToThing', test: function (done) {
   startNginx();
   expect(request("http://127.0.0.1:80/foobar")).code(is(301)).link(is("http://127.0.0.1/thing")).then(stop(), done);
