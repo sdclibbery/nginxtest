@@ -1,13 +1,29 @@
 TODO
-* Test for rewrite
 * DNS test
+* Test for file serving
 
 HTTP mocking
 
 https://www.npmjs.com/package/mock-http-server
 http://wiremock.org/
+https://github.com/jamesdbloom/mockserver
 
 
 DNS mocking
 
+* resolver in the nginx config - requires changing the nginx config to make the tests work
+
+* resolv_wrapper - would require nginx source code changes :-/
 http://jhrozek.livejournal.com/4301.html
+https://cwrap.org/resolv_wrapper.html
+
+* docker with resolv.conf or hosts overrides and/or dnsmasq - Complex but probably workable
+ * And running in a container/vm would help with FS mocking too
+http://www.onegeek.com.au/articles/resilience-testing-nginx-with-docker-dnsmasq-and-muxy
+http://www.thekelleys.org.uk/dnsmasq/doc.html
+https://github.com/mefellows/nginx-docker-setup/blob/master/Dockerfile
+
+* Some kind of mock/stub OS?
+
+
+(nginx dynamic upstream fix: http://ghost.thekindof.me/nginx-aws-elb-dns-resolution-nginx-resolver-directive-and-black-magic/)
