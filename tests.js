@@ -117,6 +117,11 @@ tests.push({name: 'rewriteFoobarToThing', test: function (done) {
   expect(request("http://127.0.0.1:80/foobar")).code(is(301)).link(is("http://127.0.0.1/thing")).then(stop(), done);
 }});
 
+tests.push({name: 'rewriteFoobarToThingPreservesQuery', test: function (done) {
+  startNginx();
+  expect(request("http://127.0.0.1:80/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/thing?doo=dah")).then(stop(), done);
+}});
+
 /*
 tests.push({name: 'proxiesThingTo', test: function (done) {
   var dns = mockDns('127.0.0.2', 8080).on("beta.other.host", goto("127.0.0.2")).and(()=>{
