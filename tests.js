@@ -46,13 +46,13 @@ var stop = function () {
     args.map((server) => server.close());
   };
 };
-
-
 function startNginx () {
   var nginx = spawn('nginx/nginx', ['-c', 'nginx.conf']);
   nginx.stderr.on('data', (d) => console.log(''+d));
   return nginx;
 };
+
+
 function request(url) {
   dbg('request');
   var req = {};
@@ -64,7 +64,7 @@ function request(url) {
     });
     res.on('end', () => {
       dbg('reqdone');
-      req.callback(res.statusCode, body);
+      req.callback(res.statusCode, body, res.headers.location);
     });
   }).on('error', (e) => {
     dbg('reqerr: '+e);
@@ -86,11 +86,13 @@ function expect (req) {
   var result = {
     code: (c) => { expected.code = c; return result; },
     body: (b) => { expected.body = b; return result; },
+    link: (l) => { expected.link = l; return result; },
     then: (cb, done) => {
-      req.callback = (code, body) => {
+      req.callback = (code, body, link) => {
         dbg('checking');
-        assert(expected.code, code, 'code');
-        assert(expected.body, body, 'body');
+        if (expected.code) { assert(expected.code, code, 'code'); }
+        if (expected.body) { assert(expected.body, body, 'body'); }
+        if (expected.link) { assert(expected.link, link, 'link'); }
         cb();
         done();
       };
@@ -105,16 +107,21 @@ var tests = [];
 
 tests.push({name: 'proxiesHomepageToLocalhost', test: function (done) {
   var server = mockServer('127.0.0.1', 8080).on("/", thenRespond(200, "homepage")).and(()=>{
-    startNginx("live");
+    startNginx();
     expect(request("http://127.0.0.1:80/")).code(is(200)).body(is("homepage")).then(stop(server), done);
   });
+}});
+
+tests.push({name: 'rewriteFoobarToThing', test: function (done) {
+  startNginx();
+  expect(request("http://127.0.0.1:80/foobar")).code(is(301)).link(is("http://127.0.0.1/thing")).then(stop(), done);
 }});
 
 /*
 tests.push({name: 'proxiesThingTo', test: function (done) {
   var dns = mockDns('127.0.0.2', 8080).on("beta.other.host", goto("127.0.0.2")).and(()=>{
     var server = mockServer('127.0.0.2', 8080).on("/thing/doodah", thenRespond(200, "thingpage")).and(()=>{
-      startNginx("live");
+      startNginx();
       expect(request("http://127.0.0.1:80/thing/doodah")).code(is(200)).body(is("thingpage")).then(stop(server, dns), done);
     });
   });
