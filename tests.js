@@ -1,5 +1,6 @@
 const spawn = require('child_process').spawn;
 const http = require('http');
+const url = require('url');
 
 var dbg = ()=>0;
 //var dbg = console.log;
@@ -53,10 +54,11 @@ function startNginx () {
 };
 
 
-function request(url) {
+function request(reqUrl) {
   dbg('request');
   var req = {};
-  http.get(url, (res) => {
+  var options = url.parse(reqUrl);
+  http.get(options, (res) => {
     var body = '';
     res.setEncoding('utf8');
     res.on('data', (chunk) => {
@@ -123,7 +125,7 @@ tests.push({name: 'rewriteFoobarToThingPreservesQuery', test: function (done) {
 }});
 
 /*
-tests.push({name: 'proxiesThingTo', test: function (done) {
+tests.push({name: 'proxiesThingToOtherHost', test: function (done) {
   var dns = mockDns('127.0.0.2', 8080).on("beta.other.host", goto("127.0.0.2")).and(()=>{
     var server = mockServer('127.0.0.2', 8080).on("/thing/doodah", thenRespond(200, "thingpage")).and(()=>{
       startNginx();
@@ -136,7 +138,7 @@ tests.push({name: 'proxiesThingTo', test: function (done) {
 function runTest(idx) {
   if (tests[idx]) {
     console.log('TEST '+tests[idx].name);
-    tests[idx].test(() => runTest(idx+1) );
+    tests[idx].test(() => setTimeout(() => runTest(idx+1), 500) );
   }
 };
 runTest(0);
