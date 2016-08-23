@@ -129,16 +129,12 @@ tests.push({name: 'rewriteFoobarToFacePreservesQuery', test: function (done) {
   expect(request("http://127.0.0.1/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/face?doo=dah")).then(stop(), done);
 }});
 
-/*
-tests.push({name: 'proxiesThingToOtherHost', test: function (done) {
-  var dns = mockDns('127.0.0.2', 8080).on("beta.other.host", goto("127.0.0.2")).and(()=>{
-    var server = mockServer('127.0.0.2', 8080).on("/thing/doodah", thenRespond(200, "thingpage")).and(()=>{
-      startNginx();
-      expect(request("http://127.0.0.1:80/thing/doodah")).code(is(200)).body(is("thingpage")).then(stop(server, dns), done);
-    });
+tests.push({name: 'proxiesFaceToOtherHost', test: function (done) {
+  var server = mockServer('127.0.0.3', 80).on("/face/doodah", thenRespond(200, "facebook")).and(()=>{
+    startNginx();
+    expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook")).then(stop(server), done);
   });
 }});
-*/
 
 function runTest(idx) {
   if (tests[idx]) {
