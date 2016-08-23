@@ -119,14 +119,14 @@ tests.push({name: 'nonExistantPageIs404', test: function (done) {
   expect(request("http://127.0.0.1:80/not-here")).code(is(404)).then(stop(), done);
 }});
 
-tests.push({name: 'rewriteFoobarToThing', test: function (done) {
+tests.push({name: 'rewriteFoobarToFace', test: function (done) {
   startNginx();
-  expect(request("http://127.0.0.1:80/foobar")).code(is(301)).link(is("http://127.0.0.1/thing")).then(stop(), done);
+  expect(request("http://127.0.0.10/foobar")).code(is(301)).link(is("http://127.0.0.1/face")).then(stop(), done);
 }});
 
-tests.push({name: 'rewriteFoobarToThingPreservesQuery', test: function (done) {
+tests.push({name: 'rewriteFoobarToFacePreservesQuery', test: function (done) {
   startNginx();
-  expect(request("http://127.0.0.1:80/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/thing?doo=dah")).then(stop(), done);
+  expect(request("http://127.0.0.1/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/face?doo=dah")).then(stop(), done);
 }});
 
 /*
