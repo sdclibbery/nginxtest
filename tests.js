@@ -107,10 +107,10 @@ var is = (x) => x;
 
 var tests = [];
 
-tests.push({name: 'proxiesHomepageToLocalhost', test: function (done) {
-  var server = mockServer('127.0.0.1', 8080).on("/", thenRespond(200, "homepage")).and(()=>{
+tests.push({name: 'proxiesGoog', test: function (done) {
+  var server = mockServer('127.0.0.2', 80).on("/goog", thenRespond(200, "google")).and(()=>{
     startNginx();
-    expect(request("http://127.0.0.1:80/")).code(is(200)).body(is("homepage")).then(stop(server), done);
+    expect(request("http://127.0.0.1/goog")).code(is(200)).body(is("google")).then(stop(server), done);
   });
 }});
 
