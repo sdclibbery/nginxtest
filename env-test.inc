@@ -2,6 +2,6 @@ upstream google {
   server 127.0.0.2;
 }
 
-upstream face {
+upstream facebook {
   server 127.0.0.3;
 }

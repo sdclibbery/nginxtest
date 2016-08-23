@@ -121,7 +121,7 @@ tests.push({name: 'nonExistantPageIs404', test: function (done) {
 
 tests.push({name: 'rewriteFoobarToFace', test: function (done) {
   startNginx();
-  expect(request("http://127.0.0.10/foobar")).code(is(301)).link(is("http://127.0.0.1/face")).then(stop(), done);
+  expect(request("http://127.0.0.1/foobar")).code(is(301)).link(is("http://127.0.0.1/face")).then(stop(), done);
 }});
 
 tests.push({name: 'rewriteFoobarToFacePreservesQuery', test: function (done) {

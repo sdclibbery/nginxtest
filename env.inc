@@ -2,6 +2,6 @@ upstream google {
   server google.com;
 }
 
-upstream face {
+upstream facebook {
   server facebook.com;
 }
