@@ -56,7 +56,7 @@ function request(reqUrl) {
     });
     res.on('end', () => {
       dbg('reqdone');
-      req.callback(res.statusCode, body, res.headers.location);
+      req.callback(res.statusCode, body, res.headers.location, res.headers);
     });
   }).on('error', (e) => {
     dbg('reqerr: '+e);
@@ -78,12 +78,14 @@ function expect (req) {
   var result = {
     code: (c) => { expected.code = c; return result; },
     body: (b) => { expected.body = b; return result; },
+    header: (h, v) => { expected.header = {name:h, value:v}; return result; },
     link: (l) => { expected.link = l; return result; },
     then: (cb, done) => {
-      req.callback = (code, body, link) => {
+      req.callback = (code, body, link, headers) => {
         dbg('checking');
         if (expected.code) { assert(expected.code, code, 'code'); }
         if (expected.body) { assert(expected.body, body, 'body'); }
+        if (expected.header) { assert(expected.header.value, headers[expected.header.name.toLowerCase()], 'header'); }
         if (expected.link) { assert(expected.link, link, 'link'); }
         cb();
         if (done) { done(); }
@@ -101,6 +103,13 @@ tests.push({name: 'proxiesGoog', test: function (done) {
   var server = mockServer('127.0.0.2', 80).on("/goog", thenRespond(200, "google")).and(()=>{
     startNginx();
     expect(request("http://127.0.0.1/goog")).code(is(200)).body(is("google")).then(stop(server), done);
+  });
+}});
+
+tests.push({name: 'proxiesGoogWithXVia', test: function (done) {
+  var server = mockServer('127.0.0.2', 80).on("/goog", thenRespond(200, "google")).and(()=>{
+    startNginx();
+    expect(request("http://127.0.0.1/goog")).code(is(200)).body(is("google")).header("X-Via", is("test nginx")).then(stop(server), done);
   });
 }});
 
