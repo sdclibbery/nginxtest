@@ -129,10 +129,20 @@ tests.push({name: 'rewriteFoobarToFacePreservesQuery', test: function (done) {
   expect(request("http://127.0.0.1/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/face?doo=dah")).then(stop(), done);
 }});
 
+//!Suggest testing round robin
 tests.push({name: 'proxiesFaceToOtherHost', test: function (done) {
   var server = mockServer('127.0.0.3', 80).on("/face/doodah", thenRespond(200, "facebook")).and(()=>{
     startNginx();
     expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook")).then(stop(server), done);
+  });
+}});
+
+tests.push({name: 'proxiesAmazonWithDns', test: function (done) {
+  var dns = mockDns('127.1.0.0', 53).on("amazon.com", "127.0.0.4").and(()=>{
+    var server = mockServer('127.0.0.4', 80).on("/amaze", thenRespond(200, "amazon")).and(()=>{
+      startNginx();
+      expect(request("http://127.0.0.1/amaze")).code(is(200)).body(is("amazon")).then(stop(server), done);
+    });
   });
 }});
 
