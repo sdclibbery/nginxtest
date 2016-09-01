@@ -29,16 +29,6 @@ function mockServer(host, port) {
 var thenRespond = (c, b) => ({ code: c, body: b });
 
 
-function mockDns(host, port) {
-  return {
-    on: function (domain, host) {
-      return { and: (cb) => { cb(); return {close:()=>0}; } }
-    },
-  };
-};
-var goto = (host) => host;
-
-
 var stop = function () {
   var args = [].slice.call(arguments, 0);
   return function() {
@@ -134,15 +124,6 @@ tests.push({name: 'proxiesFaceToOtherHost', test: function (done) {
   var server = mockServer('127.0.0.3', 80).on("/face/doodah", thenRespond(200, "facebook")).and(()=>{
     startNginx();
     expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook")).then(stop(server), done);
-  });
-}});
-
-tests.push({name: 'proxiesAmazonWithDns', test: function (done) {
-  var dns = mockDns('127.1.0.0', 53).on("amazon.com", "127.0.0.4").and(()=>{
-    var server = mockServer('127.0.0.4', 80).on("/amaze", thenRespond(200, "amazon")).and(()=>{
-      startNginx();
-      expect(request("http://127.0.0.1/amaze")).code(is(200)).body(is("amazon")).then(stop(server), done);
-    });
   });
 }});
 
