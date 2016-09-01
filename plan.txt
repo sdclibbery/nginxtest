@@ -1,6 +1,5 @@
 TODO
-* DNS test
-* Test for file serving
+* Test for file serving?
 
 HTTP mocking
 

@@ -86,7 +86,7 @@ function expect (req) {
         if (expected.body) { assert(expected.body, body, 'body'); }
         if (expected.link) { assert(expected.link, link, 'link'); }
         cb();
-        done();
+        if (done) { done(); }
       };
     },
   };
@@ -119,11 +119,21 @@ tests.push({name: 'rewriteFoobarToFacePreservesQuery', test: function (done) {
   expect(request("http://127.0.0.1/foobar?doo=dah")).code(is(301)).link(is("http://127.0.0.1/face?doo=dah")).then(stop(), done);
 }});
 
-//!Suggest testing round robin
 tests.push({name: 'proxiesFaceToOtherHost', test: function (done) {
   var server = mockServer('127.0.0.3', 80).on("/face/doodah", thenRespond(200, "facebook")).and(()=>{
     startNginx();
     expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook")).then(stop(server), done);
+  });
+}});
+
+tests.push({name: 'proxiesFaceToOtherHostsRoundRobin', test: function (done) {
+  var server1 = mockServer('127.0.0.3', 80).on("/face/doodah", thenRespond(200, "facebook1")).and(()=>{
+    var server2 = mockServer('127.0.0.4', 80).on("/face/doodah", thenRespond(200, "facebook2")).and(()=>{
+      startNginx();
+      expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook1")).then(() => {
+        expect(request("http://127.0.0.1/face/doodah")).code(is(200)).body(is("facebook2")).then(stop(server1, server2), done);
+      });
+    });
   });
 }});
 
